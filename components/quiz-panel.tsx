@@ -3,7 +3,9 @@
 import { Card } from "@/app/lesson/card";
 import { Timer } from "@/components/timer";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
+
 import { useState } from "react";
+
 
 type Question = {
     question: string;
