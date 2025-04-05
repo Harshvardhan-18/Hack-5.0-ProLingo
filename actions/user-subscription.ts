@@ -5,7 +5,7 @@
  import { absoluteUrl } from "@/lib/utils"
  import { getUserSubscription } from "@/db/queries"
 
- const returnUrl=absoluteUrl("/shop");
+ const returnUrl=absoluteUrl("/payment-success");
 
  export const createStripeUrl=async()=>{
     const {userId}=await auth();
