@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { integer, pgTable,serial,text,pgEnum,boolean,timestamp } from "drizzle-orm/pg-core";
+import { integer, pgTable,serial,text,pgEnum,boolean,timestamp,varchar } from "drizzle-orm/pg-core";
 
 export const courses=pgTable("courses",{
     id:serial("id").primaryKey(),
@@ -29,6 +29,13 @@ export const courseRelations=relations(courses,({many})=>({
 
 }))
 
+export const quizRooms = pgTable("quiz_rooms", {
+    roomId: varchar("room_id", { length: 10 }).primaryKey(),
+    userId:text("user_id").notNull(),
+    createdAt: timestamp("created_at").defaultNow(),
+  });
+
+  
 export const lessons=pgTable("lessons",{
     id:serial("id").primaryKey(),
     title:text("title").notNull(),
