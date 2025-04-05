@@ -39,6 +39,11 @@ const Sidebar = ({ className }: Props) => {
           iconSrc="/quests.svg"
         />
         <SidebarItem label="shop" href="/shop" iconSrc="/shop.svg" />
+        <SidebarItem
+          label="quiz"
+          href="/quiz"
+          iconSrc="/quiz.png" // add this icon in your public folder
+        />
       </div>
       <div className="p-4">
         <ClerkLoading>
