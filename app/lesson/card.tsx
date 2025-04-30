@@ -1,13 +1,10 @@
 import { challenges } from "@/db/schema";
 import { cn } from "@/lib/utils";
-import {useAudio,useKey} from "react-use";
-import Image from "next/image";
+import {useKey} from "react-use";
 import { useCallback } from "react";
 
 type Props={
     id:number;
-    imageSrc:string | null;
-    audioSrc:string | null;
     text:string;
     shortcut:string;
     selected?:boolean;
@@ -18,13 +15,11 @@ type Props={
 
 }
 
-export const Card = ({imageSrc,audioSrc,shortcut,selected,disabled,onClick,status,text,type}:Props) => {
-  const [audio,,controls]=useAudio({src: audioSrc || ""})
+export const Card = ({shortcut,selected,disabled,onClick,status,text,type}:Props) => {
   const handleClick=useCallback(()=>{
     if(disabled) return;
-    controls.play();
     onClick();
-  },[disabled,onClick,controls])
+  },[disabled,onClick]);
   useKey(shortcut,handleClick,{},[handleClick]);
   return (
     <div
@@ -38,16 +33,6 @@ export const Card = ({imageSrc,audioSrc,shortcut,selected,disabled,onClick,statu
       type==="ASSIST" && "lg:p-3 w-full"
     )}
     >
-      {audio}
-      {imageSrc && (
-      <div className="relative aspect-square mb-4 max-h-[80px] lg:max-h-[150px] w-full">
-        <Image
-        src={imageSrc}
-        fill
-        alt={text}
-        />
-      </div>
-    )}
     <div className={cn(
     "flex items-center justify-between",
     type==="ASSIST" && "flex-row-reverse",

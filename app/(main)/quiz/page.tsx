@@ -11,14 +11,20 @@ export default function QuizHome() {
   const router = useRouter();
   const [roomCode, setRoomCode] = useState('');
   const [isCreating, setIsCreating] = useState(false);
+  const [createdRoomCode, setCreatedRoomCode] = useState<string | null>(null);
 
   const handleCreateRoom = async () => {
     setIsCreating(true);
-    const userId = 'current-user-id'; // Replace with actual user ID from auth
+    const userId = 'current-user-id'; 
     const roomId = await createQuizRoom(userId);
-    router.push(`/quiz/${roomId}`);
+    setCreatedRoomCode(roomId);
+  
+ 
+    setTimeout(() => {
+      router.push(`/quiz/${roomId}`);
+    }, 6000); 
   };
-
+  
   const handleJoinRoom = () => {
     if (roomCode.trim()) {
       router.push(`/quiz/${roomCode}`);
@@ -35,6 +41,11 @@ export default function QuizHome() {
             <Button onClick={handleCreateRoom} disabled={isCreating}>
               {isCreating ? 'Creating...' : 'Create Room'}
             </Button>
+            {createdRoomCode && (
+              <div className="text-center text-green-600 font-semibold">
+                Room Code: {createdRoomCode}
+              </div>
+            )}
 
             <div className="flex items-center gap-2">
               <Input
