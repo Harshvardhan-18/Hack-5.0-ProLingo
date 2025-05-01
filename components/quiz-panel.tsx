@@ -7,7 +7,6 @@ import { toast } from "sonner";
 import io from "socket.io-client";
 import { Crown } from "lucide-react";
 
-
 const socket = io("http://localhost:3000", {
   path: "/api/socket",
 });
@@ -33,6 +32,7 @@ type Props = {
 export const QuizPanelSocket = ({ userName, room, userImageSrc }: Props) => {
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const [selected, setSelected] = useState<number | null>(null);
+  const [topic, setTopic] = useState("");
   const [answered, setAnswered] = useState(false);
   const [waitingForPlayers, setWaitingForPlayers] = useState(true);
   const [players, setPlayers] = useState<Player[]>([]);
@@ -43,13 +43,25 @@ export const QuizPanelSocket = ({ userName, room, userImageSrc }: Props) => {
   const [winner, setWinner] = useState<string | null>(null);
   const [hostId, setHostId] = useState<string | null>(null);
 
-  useEffect(() => {
-    socket.emit("joinRoom", room, { name: userName, image: userImageSrc,isHost:true });
+  const sendTopic = () => {
+      if (topic.trim() !== "") {
+        socket.emit("setTopic", room, topic);
+        toast("Topic set: " + topic);
+      }
+    };
 
-    socket.on("roomUpdate",(data)=>{
+  useEffect(() => {
+    socket.emit("joinRoom", room, {
+      name: userName,
+      image: userImageSrc,
+      isHost: true,
+    });
+
+    socket.on("roomUpdate", (data) => {
       setPlayers(data.players);
       setHostId(data.hostId);
     });
+    
 
     socket.on("newQuestion", (data) => {
       setWaitingForPlayers(false);
@@ -74,7 +86,7 @@ export const QuizPanelSocket = ({ userName, room, userImageSrc }: Props) => {
       setWinner(data.winner);
       setQuizComplete(true);
     });
-    
+
     return () => {
       socket.off("roomUpdate");
       socket.off("newQuestion");
@@ -99,7 +111,6 @@ export const QuizPanelSocket = ({ userName, room, userImageSrc }: Props) => {
     return () => clearInterval(interval);
   }, [timeleft]);
 
-
   const handleAnswer = (index: number) => {
     if (answered || quizComplete) return;
     setSelected(index);
@@ -121,10 +132,12 @@ export const QuizPanelSocket = ({ userName, room, userImageSrc }: Props) => {
   if (waitingForPlayers && !quizStarted) {
     return (
       <div className="flex flex-col items-center justify-center h-full">
-        <h1 className="text-3xl font-bold text-sky-600 mb-6">Waiting for players...</h1>
+        <h1 className="text-3xl font-bold text-sky-600 mb-6">
+          Waiting for players...
+        </h1>
         <div className="text-center text-green-600 pb-6 font-semibold">
-                Room Code: {room}
-              </div>
+          Room Code: {room}
+        </div>
         <div className="grid grid-cols-2 gap-4">
           {players.map((player) => (
             <div key={player.name} className="flex flex-col items-center">
@@ -132,19 +145,41 @@ export const QuizPanelSocket = ({ userName, room, userImageSrc }: Props) => {
                 <AvatarImage src={player.image} />
               </Avatar>
               <p className="mt-2 font-semibold">{player.name}</p>
-              {player.id === hostId && <Crown size={16} className="text-yellow-500 animate-bounce drop-shadow-lg" />}
+              {player.id === hostId && (
+                <Crown
+                  size={16}
+                  className="text-yellow-500 animate-bounce drop-shadow-lg"
+                />
+              )}
             </div>
           ))}
         </div>
-  
+        {socket.id === hostId && (
+          <div className="flex gap-2 mt-4">
+            <input
+              type="text"
+              placeholder="Enter topic (e.g., JavaScript)"
+              value={topic}
+              onChange={(e) => setTopic(e.target.value)}
+              className="border px-4 py-2 rounded"
+            />
+            <button
+              onClick={sendTopic}
+              className="bg-blue-500 text-white px-4 py-2 rounded"
+            >
+              Set Topic
+            </button>
+          </div>
+        )}
+
         {/* Start Quiz button */}
-        {socket.id === hostId && (  
-        <button
-          onClick={() => socket.emit("startQuiz", room)}
-          className="mt-8 px-6 py-3 bg-green-500 text-white rounded-full text-lg font-bold hover:bg-green-600"
-        >
-          Start Quiz
-        </button>
+        {socket.id === hostId && (
+          <button
+            onClick={() => socket.emit("startQuiz", room)}
+            className="mt-8 px-6 py-3 bg-green-500 text-white rounded-full text-lg font-bold hover:bg-green-600"
+          >
+            Start Quiz
+          </button>
         )}
       </div>
     );
@@ -202,19 +237,13 @@ export const QuizPanelSocket = ({ userName, room, userImageSrc }: Props) => {
         </div>
 
         <div className="flex flex-col items-center">
-          
-            
-              <Avatar className="border bg-violet-500 h-16 w-16">
-                <AvatarImage src={opponent?.image || ""} />
-              </Avatar>
-              <p className="font-semibold text-neutral-800 mt-2">
-                {opponent?.name || "Opponent"}
-              </p>
-              <p className="text-neutral-500 text-sm">
-                {opponent?.score || 0}
-              </p>
-            
-           
+          <Avatar className="border bg-violet-500 h-16 w-16">
+            <AvatarImage src={opponent?.image || ""} />
+          </Avatar>
+          <p className="font-semibold text-neutral-800 mt-2">
+            {opponent?.name || "Opponent"}
+          </p>
+          <p className="text-neutral-500 text-sm">{opponent?.score || 0}</p>
         </div>
       </div>
     </div>
